@@ -28,7 +28,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [openConfirm, setOpenConfirm] = useState(false); 
+  const [openConfirm, setOpenConfirm] = useState(false);
 
   const API_BASE = "http://localhost:5000";
 
