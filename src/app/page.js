@@ -9,11 +9,16 @@ import {
   Card,
   CardContent,
   List,
-  ListItem,
-  ListItemText,
   Box,
   CircularProgress,
   Divider,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 
 export default function Home() {
@@ -21,8 +26,11 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false); 
 
-  const API_BASE ="http://localhost:5000";
+  const API_BASE = "http://localhost:5000";
 
   const fetchFeedbacks = async () => {
     setLoading(true);
@@ -43,8 +51,17 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !message) return alert("Please fill in all fields.");
 
+    if (!name.trim() || !message.trim()) {
+      setError("Please fill in both Name and Feedback fields.");
+      return;
+    }
+
+    setOpenConfirm(true);
+  };
+
+  const confirmSubmit = async () => {
+    setOpenConfirm(false);
     try {
       const res = await fetch(`${API_BASE}/api/feedback`, {
         method: "POST",
@@ -54,14 +71,17 @@ export default function Home() {
 
       if (!res.ok) {
         const err = await res.json();
-        return alert(err.error || "Failed to submit feedback");
+        setError(err.error || "Failed to submit feedback");
+        return;
       }
 
       setName("");
       setMessage("");
+      setSuccess(true);
       fetchFeedbacks();
     } catch (err) {
       console.error("Error submitting feedback:", err);
+      setError("Something went wrong. Please try again later.");
     }
   };
 
@@ -83,6 +103,7 @@ export default function Home() {
             fullWidth
             value={name}
             onChange={(e) => setName(e.target.value)}
+            error={!name.trim() && !!error}
           />
           <TextField
             label="Your Feedback"
@@ -92,6 +113,8 @@ export default function Home() {
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            error={!message.trim() && !!error}
+            helperText={!message.trim() && !!error ? "Required field" : ""}
           />
           <Button
             type="submit"
@@ -151,6 +174,54 @@ export default function Home() {
           )}
         </List>
       )}
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={4000}
+        onClose={() => setError("")}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setError("")}
+          severity="warning"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={success}
+        autoHideDuration={3000}
+        onClose={() => setSuccess(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSuccess(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          Feedback submitted successfully!
+        </Alert>
+      </Snackbar>
+
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Confirm Submission</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to submit your feedback?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
+          <Button onClick={confirmSubmit} variant="contained" color="primary">
+            Yes, Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }
