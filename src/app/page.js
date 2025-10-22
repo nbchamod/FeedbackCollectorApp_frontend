@@ -155,6 +155,11 @@ export default function Home() {
                   boxShadow: 2,
                   transition: "0.2s",
                   "&:hover": { boxShadow: 5 },
+                  backgroundColor: "#e3f2fd", // 🌊 light blue background
+                  "&:hover": {
+                    boxShadow: 5,
+                    backgroundColor: "#bbdefb", // slightly darker blue on hover
+                  },
                 }}
               >
                 <CardContent>
